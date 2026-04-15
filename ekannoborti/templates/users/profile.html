@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-10 max-w-2xl">
+    <div class="bg-white shadow-md rounded-2xl p-8 border border-purple-100">
+
+        <div class="flex items-center gap-6 mb-8">
+            <div>
+                {% if user_profile.profile_picture %}
+                    <img src="{{ user_profile.profile_picture.url }}" alt="Profile"
+                         class="w-24 h-24 rounded-full object-cover border-4 border-purple-400">
+                {% else %}
+                    <div class="w-24 h-24 rounded-full bg-purple-500 text-white flex items-center justify-center text-4xl font-bold border-4 border-purple-300">
+                        {{ user.username|slice:":1"|upper }}
+                    </div>
+                {% endif %}
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">{{ user.first_name|default:user.username }}</h2>
+                <p class="text-gray-400 text-sm">@{{ user.username }}</p>
+                <span class="inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold
+                    {% if user_profile.role == 'manager' %}bg-purple-100 text-purple-700
+                    {% elif user_profile.role == 'seeker' %}bg-blue-100 text-blue-700
+                    {% else %}bg-pink-100 text-pink-700{% endif %}">
+                    {{ user_profile.role|title }}
+                </span>
+            </div>
+        </div>
+
+        <hr class="border-gray-100 mb-6">
+
+        <div class="space-y-4">
+            <div class="flex border-b border-gray-100 pb-3">
+                <span class="font-medium text-gray-500 w-36 text-sm">Full Name</span>
+                <span class="text-gray-700 text-sm">{{ user.first_name|default:"Not provided" }}</span>
+            </div>
+            <div class="flex border-b border-gray-100 pb-3">
+                <span class="font-medium text-gray-500 w-36 text-sm">Email</span>
+                <span class="text-gray-700 text-sm">{{ user.email|default:"Not provided" }}</span>
+            </div>
+            <div class="flex border-b border-gray-100 pb-3">
+                <span class="font-medium text-gray-500 w-36 text-sm">Phone</span>
+                <span class="text-gray-700 text-sm">{{ user_profile.phone|default:"Not provided" }}</span>
+            </div>
+            <div class="flex border-b border-gray-100 pb-3">
+                <span class="font-medium text-gray-500 w-36 text-sm">Gender</span>
+                <span class="text-gray-700 text-sm">{{ user_profile.gender|title|default:"Not provided" }}</span>
+            </div>
+            <div class="flex border-b border-gray-100 pb-3">
+                <span class="font-medium text-gray-500 w-36 text-sm">Date of Birth</span>
+                <span class="text-gray-700 text-sm">{{ user_profile.date_of_birth|default:"Not provided" }}</span>
+            </div>
+            <div class="flex border-b border-gray-100 pb-3">
+                <span class="font-medium text-gray-500 w-36 text-sm">Institution</span>
+                <span class="text-gray-700 text-sm">{{ user_profile.institution|default:"Not provided" }}</span>
+            </div>
+            <div class="flex border-b border-gray-100 pb-3">
+                <span class="font-medium text-gray-500 w-36 text-sm">Student ID</span>
+                <span class="text-gray-700 text-sm">{{ user_profile.student_id|default:"Not provided" }}</span>
+            </div>
+            <div class="flex border-b border-gray-100 pb-3">
+                <span class="font-medium text-gray-500 w-36 text-sm">Address</span>
+                <span class="text-gray-700 text-sm">{{ user_profile.address|default:"Not provided" }}</span>
+            </div>
+            <div class="flex pb-3">
+                <span class="font-medium text-gray-500 w-36 text-sm">Joined</span>
+                <span class="text-gray-700 text-sm">{{ user_profile.created_at|date:"F j, Y" }}</span>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-8 flex flex-wrap gap-3">
+            <a href="{% url 'edit_profile' %}"
+               class="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-xl text-sm font-medium transition">
+                Edit Profile
+            </a>
+            <a href="{% url 'change_password' %}"
+               class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-5 py-2 rounded-xl text-sm font-medium transition">
+                Change Password
+            </a>
+            <a href="{% url 'delete_account' %}"
+               class="bg-red-100 hover:bg-red-200 text-red-600 px-5 py-2 rounded-xl text-sm font-medium transition ml-auto">
+                Delete Account
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
