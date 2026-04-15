@@ -34,7 +34,7 @@ def send_request(request, room_id):
 
         RoomRequest.objects.create(
             room=room,
-            seeker=user_profile,   # ✅ FIX এখানে
+            seeker=user_profile,
             message=message_text
         )
 
