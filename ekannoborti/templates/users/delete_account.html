@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-md mx-auto mt-12 mb-12 px-4">
+    <div class="bg-white shadow-md rounded-2xl p-8 border border-red-100">
+
+        <div class="text-center mb-6">
+            <h2 class="text-2xl font-bold text-red-700">Delete Account</h2>
+            <p class="text-gray-500 text-sm mt-2">This action is permanent and cannot be undone.</p>
+        </div>
+
+        <div class="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-6 text-sm text-red-600">
+            All your data including meal logs, expenses, and profile information will be permanently deleted.
+        </div>
+
+        <form method="POST" class="flex gap-3">
+            {% csrf_token %}
+            <button type="submit"
+                    class="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl font-semibold text-sm transition">
+                Yes, Delete My Account
+            </button>
+            <a href="{% url 'profile' %}"
+               class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-xl font-semibold text-sm transition text-center">
+                Cancel
+            </a>
+        </form>
+    </div>
+</div>
+{% endblock %}
