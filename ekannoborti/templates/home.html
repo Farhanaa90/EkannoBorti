@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-20 text-center">
+
+    <h1 class="text-5xl font-bold text-purple-800 mb-4">Welcome to EkannoBorti</h1>
+    <p class="text-xl text-purple-500 mb-10">Simplifying Shared Living — Manage your mess, track meals & expenses</p>
+
+    {% if user.is_authenticated %}
+        <div class="bg-blue-50 border border-blue-200 text-blue-800 px-6 py-4 rounded-xl mb-8 inline-block">
+            <p class="text-lg">Hello, <strong>{{ user.first_name|default:user.username }}</strong>!</p>
+            <p class="text-sm text-blue-600">Logged in as: <strong>{{ user.userprofile.role|title }}</strong></p>
+        </div>
+        <br>
+        <a href="{% url 'logout' %}" class="bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-xl font-semibold transition">
+            Logout
+        </a>
+    {% endif %}
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 max-w-4xl mx-auto text-left">
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-purple-100">
+            <h3 class="font-bold text-purple-800 text-lg mb-2">Meal Tracking</h3>
+            <p class="text-gray-500 text-sm">Log daily meals and track your food expenses automatically.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-pink-100">
+            <h3 class="font-bold text-pink-700 text-lg mb-2">Expense Management</h3>
+            <p class="text-gray-500 text-sm">Split monthly expenses fairly among all mess members.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-blue-100">
+            <h3 class="font-bold text-blue-700 text-lg mb-2">Room Search</h3>
+            <p class="text-gray-500 text-sm">Find available rooms and send requests directly to managers.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
