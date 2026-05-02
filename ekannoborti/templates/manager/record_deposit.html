@@ -1,0 +1,61 @@
+{% extends 'manager/base_manager.html' %}
+{% block title %}Record Deposit{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{% url 'dashboard' %}">← Back to Home</a>
+<div class="page-title">💳 Record Deposit</div>
+<div class="page-sub">{{ mess.mess_name }} · Record member fund deposits</div>
+
+<div class="stats">
+  <div class="stat"><div class="lbl">Total Deposited</div><div class="val" style="color:#16a34a;">৳{{ total_deposited }}</div></div>
+  <div class="stat"><div class="lbl">This Month</div><div class="val" style="color:#6a0dad;">৳{{ this_month }}</div></div>
+  <div class="stat"><div class="lbl">Total Expense</div><div class="val" style="color:#ea580c;">৳{{ total_expense }}</div></div>
+  <div class="stat"><div class="lbl">Balance</div><div class="val" style="color:{% if balance >= 0 %}#16a34a{% else %}#dc2626{% endif %};">{% if balance < 0 %}-{% endif %}৳{{ balance|floatformat:0 }}</div></div>
+</div>
+
+<div class="two-col">
+  <div class="col">
+    <div class="card">
+      <h3>➕ Record New Deposit</h3>
+      <form method="POST" action="{% url 'record_deposit' %}">
+        {% csrf_token %}
+        <div class="fg">
+          <label>Select Member</label>
+          <select name="member_id" required>
+            <option value="">— Select a member —</option>
+            {% for m in members %}
+            <option value="{{ m.id }}">{{ m.user.user.get_full_name|default:m.user.user.username }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="fg">
+          <label>Amount</label>
+          <div class="iw"><span>৳</span><input type="number" name="amount" placeholder="0" min="0" step="0.01" required/></div>
+        </div>
+        <div class="fg"><label>Deposit Date</label><input type="date" name="deposit_date"/></div>
+        <div class="fg"><label>Note (Optional)</label><textarea name="note" placeholder="e.g. April monthly fund"></textarea></div>
+        <button type="submit" class="btn btn-full" style="background:#16a34a; color:#fff;">✓ Record Deposit</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="card">
+      <h3>📋 Deposit History</h3>
+      <table>
+        <tr><th>Member</th><th>Date</th><th>Amount</th><th>Note</th></tr>
+        {% for d in recent_deposits %}
+        <tr>
+          <td>{{ d.member.user.user.get_full_name|default:d.member.user.user.username }}</td>
+          <td>{{ d.deposit_date }}</td>
+          <td><span class="badge bg-green">৳{{ d.amount }}</span></td>
+          <td style="font-size:0.75rem; color:#aaa;">{{ d.note|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" style="color:#bbb; text-align:center; padding:20px;">No deposits recorded yet.</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

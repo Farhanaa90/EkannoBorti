@@ -1,0 +1,11 @@
+{% extends 'manager/base_manager.html' %}
+{% block title %}No Mess Found{% endblock %}
+
+{% block content %}
+<div style="text-align:center; padding:80px 20px;">
+  <p style="font-size:3rem;">🏠</p>
+  <h2 style="font-size:1.35rem; font-weight:800; color:#4a0090; margin-top:16px;">You have no Mess assigned</h2>
+  <p style="color:#888; margin-top:8px; font-size:0.88rem;">Please ask the admin to create a Mess and assign you as manager.</p>
+  <a href="/admin/manager/mess/add/" class="btn btn-p" style="margin-top:24px; display:inline-block;">Create Mess from Admin Panel</a>
+</div>
+{% endblock %}
