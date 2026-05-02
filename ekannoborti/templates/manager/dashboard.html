@@ -1,0 +1,69 @@
+{% extends 'manager/base_manager.html' %}
+{% block title %}Home{% endblock %}
+{% block nav_home %}active{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 22px;">
+  <div style="font-size: 1.5rem; font-weight: 800; color: #4a0090;">Welcome, {{ request.user.first_name|default:request.user.username }}! 👋</div>
+  <div style="color: #888; font-size: 0.88rem; margin-top: 4px;">Mess Manager — {{ mess.mess_name }}</div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><div class="lbl">Total Members</div><div class="val" style="color:#6a0dad">{{ total_members }}</div></div>
+  <div class="stat"><div class="lbl">This Month Expense</div><div class="val" style="color:#2563eb">৳{{ month_expense }}</div></div>
+  <div class="stat"><div class="lbl">Total Deposit</div><div class="val" style="color:#16a34a">৳{{ total_deposit }}</div></div>
+  <div class="stat"><div class="lbl">Pending Requests</div><div class="val" style="color:#ea580c">{{ pending_requests }}</div></div>
+  <div class="stat"><div class="lbl">Unread Complaints</div><div class="val" style="color:#e91e8c">{{ unread_complaints }}</div></div>
+</div>
+
+<!-- QUICK ACTIONS -->
+<div style="font-size: 1rem; font-weight: 700; color: #4a0090; margin-bottom: 14px;">Quick Actions</div>
+<div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 10px;">
+
+  <a href="{% url 'manage_members' %}" style="background:#fff; border:2px solid #e8d5ff; border-radius:10px; padding:16px 20px; text-decoration:none; display:flex; align-items:center; gap:10px; font-size:0.87rem; font-weight:600; color:#4a0090; transition:all 0.18s; flex:1; min-width:150px;"
+     onmouseover="this.style.borderColor='#6a0dad';this.style.background='#f3eeff'"
+     onmouseout="this.style.borderColor='#e8d5ff';this.style.background='#fff'">
+    <span style="font-size:1.3rem;">👥</span> Manage Members
+  </a>
+
+  <a href="{% url 'set_meal_rate' %}" style="background:#fff; border:2px solid #e8d5ff; border-radius:10px; padding:16px 20px; text-decoration:none; display:flex; align-items:center; gap:10px; font-size:0.87rem; font-weight:600; color:#4a0090; transition:all 0.18s; flex:1; min-width:150px;"
+     onmouseover="this.style.borderColor='#6a0dad';this.style.background='#f3eeff'"
+     onmouseout="this.style.borderColor='#e8d5ff';this.style.background='#fff'">
+    <span style="font-size:1.3rem;">🍽️</span> Set Meal Rate
+  </a>
+
+  <a href="{% url 'add_expense' %}" style="background:#fff; border:2px solid #e8d5ff; border-radius:10px; padding:16px 20px; text-decoration:none; display:flex; align-items:center; gap:10px; font-size:0.87rem; font-weight:600; color:#4a0090; transition:all 0.18s; flex:1; min-width:150px;"
+     onmouseover="this.style.borderColor='#6a0dad';this.style.background='#f3eeff'"
+     onmouseout="this.style.borderColor='#e8d5ff';this.style.background='#fff'">
+    <span style="font-size:1.3rem;">💰</span> Add Expense
+  </a>
+
+  <a href="{% url 'record_deposit' %}" style="background:#fff; border:2px solid #e8d5ff; border-radius:10px; padding:16px 20px; text-decoration:none; display:flex; align-items:center; gap:10px; font-size:0.87rem; font-weight:600; color:#4a0090; transition:all 0.18s; flex:1; min-width:150px;"
+     onmouseover="this.style.borderColor='#6a0dad';this.style.background='#f3eeff'"
+     onmouseout="this.style.borderColor='#e8d5ff';this.style.background='#fff'">
+    <span style="font-size:1.3rem;">💳</span> Record Deposit
+  </a>
+
+  <a href="{% url 'post_room' %}" style="background:#fff; border:2px solid #e8d5ff; border-radius:10px; padding:16px 20px; text-decoration:none; display:flex; align-items:center; gap:10px; font-size:0.87rem; font-weight:600; color:#4a0090; transition:all 0.18s; flex:1; min-width:150px;"
+     onmouseover="this.style.borderColor='#6a0dad';this.style.background='#f3eeff'"
+     onmouseout="this.style.borderColor='#e8d5ff';this.style.background='#fff'">
+    <span style="font-size:1.3rem;">🏠</span> Post Room
+  </a>
+
+  <a href="{% url 'room_requests' %}" style="background:#fff; border:2px solid #e8d5ff; border-radius:10px; padding:16px 20px; text-decoration:none; display:flex; align-items:center; gap:10px; font-size:0.87rem; font-weight:600; color:#4a0090; transition:all 0.18s; flex:1; min-width:150px;"
+     onmouseover="this.style.borderColor='#6a0dad';this.style.background='#f3eeff'"
+     onmouseout="this.style.borderColor='#e8d5ff';this.style.background='#fff'">
+    <span style="font-size:1.3rem;">📋</span> Room Requests
+    {% if pending_requests > 0 %}<span class="badge bg-yellow" style="margin-left:auto;">{{ pending_requests }}</span>{% endif %}
+  </a>
+
+  <a href="{% url 'view_complaints' %}" style="background:#fff; border:2px solid #e8d5ff; border-radius:10px; padding:16px 20px; text-decoration:none; display:flex; align-items:center; gap:10px; font-size:0.87rem; font-weight:600; color:#4a0090; transition:all 0.18s; flex:1; min-width:150px;"
+     onmouseover="this.style.borderColor='#6a0dad';this.style.background='#f3eeff'"
+     onmouseout="this.style.borderColor='#e8d5ff';this.style.background='#fff'">
+    <span style="font-size:1.3rem;">📣</span> View Complaints
+    {% if unread_complaints > 0 %}<span class="badge bg-red" style="margin-left:auto;">{{ unread_complaints }}</span>{% endif %}
+  </a>
+
+</div>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends 'manager/base_manager.html' %}
+{% block title %}Manage Members{% endblock %}
+
+{% block content %}
+<!-- ADD MEMBER MODAL -->
+<div id="addModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:300; align-items:center; justify-content:center;">
+  <div style="background:#fff; border-radius:14px; padding:30px 26px; width:100%; max-width:400px; box-shadow:0 8px 40px rgba(106,13,173,0.18);">
+    <h3 style="font-size:1.05rem; font-weight:800; color:#4a0090; margin-bottom:18px;">➕ Add New Member</h3>
+    <form method="POST" action="{% url 'manage_members' %}">
+      {% csrf_token %}
+      <div class="fg"><label>Username</label><input type="text" name="username" placeholder="Enter member's username" required/></div>
+      <div class="fg"><label>Joined Date</label><input type="date" name="joined_date"/></div>
+      <div style="display:flex; gap:10px; margin-top:16px;">
+        <button type="submit" class="btn btn-p" style="flex:1;">Add Member</button>
+        <button type="button" class="btn btn-l" style="flex:1; border:2px solid #e8d5ff;" onclick="document.getElementById('addModal').style.display='none'">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="ph-row">
+  <div>
+    <div class="page-title">👥 Manage Members</div>
+    <div class="page-sub" style="margin-bottom:0;">{{ mess.mess_name }} · Add, view and manage mess members</div>
+  </div>
+  <button class="btn btn-p" onclick="document.getElementById('addModal').style.display='flex'">+ Add Member</button>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="lbl">Total Members</div><div class="val" style="color:#6a0dad;">{{ total }}</div></div>
+  <div class="stat"><div class="lbl">Active</div><div class="val" style="color:#16a34a;">{{ active }}</div></div>
+  <div class="stat"><div class="lbl">Inactive</div><div class="val" style="color:#ca8a04;">{{ inactive }}</div></div>
+</div>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <form method="GET" style="display:flex; gap:10px; flex:1; flex-wrap:wrap;">
+    <input class="sbox" type="text" name="search" placeholder="🔍  Search by username..." value="{{ search }}"/>
+    <select class="sbox" name="status" style="flex:unset; width:auto;" onchange="this.form.submit()">
+      <option value="all"      {% if status_f == 'all' %}selected{% endif %}>All Status</option>
+      <option value="active"   {% if status_f == 'active' %}selected{% endif %}>Active</option>
+      <option value="inactive" {% if status_f == 'inactive' %}selected{% endif %}>Inactive</option>
+    </select>
+    <button type="submit" class="btn btn-l">Search</button>
+  </form>
+</div>
+
+<!-- MEMBER LIST -->
+{% for m in members %}
+<div style="background:#fff; border-radius:12px; padding:14px 18px; display:flex; align-items:center; gap:14px; box-shadow:0 2px 10px rgba(106,13,173,0.06); flex-wrap:wrap; margin-bottom:10px;">
+  <div style="width:42px; height:42px; border-radius:50%; background:#f3eeff; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; border:2px solid #e8d5ff;">👤</div>
+  <div style="flex:1; min-width:140px;">
+    <div style="font-size:0.92rem; font-weight:700; color:#333;">{{ m.user.user.get_full_name|default:m.user.user.username }}</div>
+    <div style="font-size:0.77rem; color:#888; margin-top:2px;">Joined: {{ m.joined_date }}</div>
+  </div>
+  <div style="display:flex; gap:20px; flex-wrap:wrap; margin-right:8px;">
+    <div style="text-align:center;">
+      <div style="font-size:0.68rem; color:#aaa;">Due</div>
+      <div style="font-size:0.85rem; font-weight:700; color:{% if m.total_due > 0 %}#dc2626{% else %}#16a34a{% endif %};">৳{{ m.total_due }}</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:0.68rem; color:#aaa;">Status</div>
+      <span class="badge {% if m.is_active %}bg-green{% else %}bg-yellow{% endif %}">{% if m.is_active %}Active{% else %}Inactive{% endif %}</span>
+    </div>
+  </div>
+  <div style="display:flex; gap:8px;">
+    <a href="{% url 'view_member_profile' m.id %}" class="btn btn-l" style="font-size:0.78rem; padding:6px 13px;">View Profile</a>
+    <form method="POST" action="{% url 'remove_member' m.id %}" onsubmit="return confirm('Remove {{ m.user.user.username }} from mess?')">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-r" style="font-size:0.78rem; padding:6px 13px;">Remove</button>
+    </form>
+  </div>
+</div>
+{% empty %}
+<div style="text-align:center; padding:60px 20px; color:#bbb;">
+  <p style="font-size:2rem;">👥</p>
+  <p style="margin-top:12px;">No members yet. Click "+ Add Member" to get started.</p>
+</div>
+{% endfor %}
+
+<script>
+document.getElementById('addModal').addEventListener('click', function(e) {
+  if (e.target === this) this.style.display = 'none';
+});
+</script>
+{% endblock %}

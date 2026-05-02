@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EkannoBorti — {% block title %}Manager{% endblock %}</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f3eeff; color: #333; min-height: 100vh; display: flex; flex-direction: column; }
+
+  /* ── NAVBAR ── */
+  .navbar {
+    background: #6a0dad;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    padding: 0 40px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  /* Logo — clicks to home */
+  .nav-logo {
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 900;
+    text-decoration: none;
+    letter-spacing: -0.5px;
+    margin-right: 40px;
+    font-style: italic;
+  }
+  .nav-logo:hover { opacity: 0.88; }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+  }
+  .nav-links a {
+    color: rgba(255,255,255,0.88);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 6px 18px;
+    border-radius: 4px;
+    transition: background 0.18s;
+    white-space: nowrap;
+    position: relative;
+  }
+  .nav-links a:hover,
+  .nav-links a.active {
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+  }
+  .nav-links a.active::after {
+    content: '';
+    display: block;
+    height: 3px;
+    background: #fff;
+    border-radius: 2px;
+    position: absolute;
+    bottom: -2px;
+    left: 18px;
+    right: 18px;
+  }
+  .notif-link { position: relative; }
+  .notif-dot {
+    position: absolute;
+    top: 3px; right: 8px;
+    background: #ff3b6b;
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 800;
+    border-radius: 50%;
+    width: 16px; height: 16px;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid #6a0dad;
+  }
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-left: auto;
+  }
+  .nav-hello { color: #e8d5ff; font-size: 0.85rem; }
+  .nav-dd { position: relative; }
+  .btn-account {
+    background: rgba(255,255,255,0.15);
+    border: 1.5px solid rgba(255,255,255,0.35);
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 5px;
+    font-weight: 700;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-account:hover { background: rgba(255,255,255,0.25); }
+  .dd-menu {
+    display: none;
+    position: absolute;
+    right: 0; top: 110%;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    min-width: 170px;
+    z-index: 200;
+    overflow: hidden;
+  }
+  .nav-dd:hover .dd-menu { display: block; }
+  .dd-menu a {
+    display: block;
+    padding: 11px 18px;
+    font-size: 0.83rem;
+    color: #444;
+    text-decoration: none;
+    border-bottom: 1px solid #f3eeff;
+    transition: background 0.15s;
+  }
+  .dd-menu a:hover { background: #f3eeff; color: #6a0dad; }
+  .dd-menu a.logout { color: #dc2626; }
+  .dd-menu a.logout:hover { background: #fee2e2; }
+
+  /* ── MAIN ── */
+  .main { flex: 1; padding: 30px 40px; max-width: 1100px; margin: 0 auto; width: 100%; }
+
+  /* ── MESSAGES ── */
+  .msg { padding: 10px 16px; border-radius: 8px; font-size: 0.87rem; margin-bottom: 12px; }
+  .msg-ok  { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
+  .msg-err { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+
+  /* ── SHARED COMPONENTS ── */
+  .back-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: #6a0dad; font-size: 0.85rem; font-weight: 600;
+    text-decoration: none; margin-bottom: 22px;
+  }
+  .back-link:hover { text-decoration: underline; }
+  .page-title { font-size: 1.45rem; font-weight: 800; color: #4a0090; margin-bottom: 4px; }
+  .page-sub   { color: #888; font-size: 0.87rem; margin-bottom: 24px; }
+  .ph-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
+
+  .stats { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 22px; }
+  .stat  { background: #fff; border-radius: 10px; padding: 16px 20px; flex: 1; min-width: 120px; box-shadow: 0 2px 10px rgba(106,13,173,0.07); }
+  .stat .lbl { font-size: 0.74rem; color: #999; margin-bottom: 5px; }
+  .stat .val { font-size: 1.55rem; font-weight: 800; }
+
+  .card { background: #fff; border-radius: 12px; padding: 22px; box-shadow: 0 2px 12px rgba(106,13,173,0.07); margin-bottom: 20px; }
+  .card h3 { font-size: 0.92rem; font-weight: 700; color: #4a0090; margin-bottom: 16px; }
+
+  .fg { margin-bottom: 13px; }
+  .fg label { display: block; font-size: 0.82rem; font-weight: 600; color: #444; margin-bottom: 5px; }
+  .fg input, .fg select, .fg textarea {
+    width: 100%; padding: 9px 12px; border: 1.5px solid #ddd;
+    border-radius: 8px; font-size: 0.88rem; outline: none;
+    background: #fafafa; transition: border 0.2s; font-family: inherit;
+  }
+  .fg textarea { resize: vertical; min-height: 78px; }
+  .fg input:focus, .fg select:focus, .fg textarea:focus { border-color: #6a0dad; background: #fff; }
+  .iw { position: relative; }
+  .iw span { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 0.88rem; color: #888; font-weight: 600; }
+  .iw input { padding-left: 26px; }
+
+  .btn { border: none; padding: 9px 22px; border-radius: 8px; font-size: 0.88rem; font-weight: 700; cursor: pointer; transition: background 0.18s; display: inline-block; text-decoration: none; }
+  .btn-p { background: #6a0dad; color: #fff; } .btn-p:hover { background: #4a0090; }
+  .btn-g { background: #dcfce7; color: #16a34a; } .btn-g:hover { background: #bbf7d0; }
+  .btn-r { background: #fee2e2; color: #dc2626; } .btn-r:hover { background: #fecaca; }
+  .btn-l { background: #f3eeff; color: #6a0dad; } .btn-l:hover { background: #e8d5ff; }
+  .btn-full { width: 100%; margin-top: 6px; text-align: center; }
+
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+  .bg-green  { background: #dcfce7; color: #16a34a; }
+  .bg-yellow { background: #fef9c3; color: #ca8a04; }
+  .bg-red    { background: #fee2e2; color: #dc2626; }
+  .bg-purple { background: #f3eeff; color: #6a0dad; }
+  .bg-blue   { background: #dbeafe; color: #2563eb; }
+  .bg-gray   { background: #f1f5f9; color: #64748b; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th { font-size: 0.75rem; color: #999; font-weight: 600; text-align: left; padding: 6px 0; border-bottom: 1px solid #f0e6ff; }
+  td { font-size: 0.83rem; color: #444; padding: 9px 0; border-bottom: 1px solid #f9f4ff; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #faf5ff; }
+
+  .two-col { display: flex; gap: 22px; flex-wrap: wrap; }
+  .col     { flex: 1; min-width: 270px; }
+  .col-l   { flex: 1.2; min-width: 290px; }
+  .col-r   { flex: 1; min-width: 250px; }
+
+  .toolbar { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; }
+  .fbtn    { padding: 6px 16px; border-radius: 20px; border: 2px solid #e8d5ff; background: #fff; color: #6a0dad; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.18s; text-decoration: none; }
+  .fbtn:hover, .fbtn.on { background: #6a0dad; color: #fff; border-color: #6a0dad; }
+  .sbox { flex: 1; min-width: 180px; padding: 8px 13px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 0.87rem; outline: none; background: #fff; }
+  .sbox:focus { border-color: #6a0dad; }
+
+  footer { background: #6a0dad; color: #fff; text-align: center; padding: 14px; font-size: 0.82rem; margin-top: auto; }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="nav-logo" href="{% url 'manager_dashboard' %}">EkannoBorti</a>
+
+  <div class="nav-links">
+    <a href="{% url 'notifications' %}" class="notif-link {% block nav_notif %}{% endblock %}">
+      Notifications
+      {% if unread_notifs > 0 %}<span class="notif-dot">{{ unread_notifs }}</span>{% endif %}
+    </a>
+    <a href="{% url 'manager_rotation' %}" class="{% block nav_rotation %}{% endblock %}">Manager Rotation</a>
+  </div>
+
+  <div class="nav-right">
+    <span class="nav-hello">Hello, {{ request.user.first_name|default:request.user.username }}</span>
+    <div class="nav-dd">
+      <button class="btn-account">Account ▾</button>
+      <div class="dd-menu">
+        <a href="{% url 'profile' %}">👤 My Profile</a>
+        <a href="{% url 'edit_profile' %}">✏️ Edit Profile</a>
+        <a href="{% url 'change_password' %}">🔒 Change Password</a>
+        <a href="{% url 'logout' %}" class="logout">🚪 Logout</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="main">
+  {% if messages %}
+    {% for m in messages %}
+      <div class="msg {% if m.tags == 'error' %}msg-err{% else %}msg-ok{% endif %}">{{ m }}</div>
+    {% endfor %}
+  {% endif %}
+
+  {% block content %}{% endblock %}
+</div>
+
+<footer>© 2026 EkannoBorti — Simplifying Shared Living</footer>
+</body>
+</html>
