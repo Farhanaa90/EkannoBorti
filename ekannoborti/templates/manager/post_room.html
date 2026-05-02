@@ -1,0 +1,58 @@
+{% extends 'manager/base_manager.html' %}
+{% block title %}Post Room{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{% url 'dashboard' %}">← Back to Home</a>
+<div class="page-title">🏠 Post Room</div>
+<div class="page-sub">{{ mess.mess_name }} · Post available rooms for seekers to find and request</div>
+
+<div class="two-col">
+  <div class="col-l">
+    <div class="card">
+      <h3>➕ Post a New Room</h3>
+      <form method="POST" action="{% url 'post_room' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="fg"><label>Full Address</label><input type="text" name="address" placeholder="e.g. House 12, Road 5, Dhanmondi, Dhaka" required/></div>
+        <div class="fg"><label>Room Details</label><textarea name="details" placeholder="e.g. Furnished single room, attached bathroom, 2nd floor..."></textarea></div>
+        <div class="fg">
+          <label>Monthly Price</label>
+          <div class="iw"><span>৳</span><input type="number" name="monthly_price" placeholder="0" min="0" required/></div>
+        </div>
+        <div class="fg">
+          <label>Room Photo (Optional)</label>
+          <input type="file" name="photo" accept="image/*" style="padding:8px; background:#fff;"/>
+        </div>
+        <button type="submit" class="btn btn-p btn-full">Post Room</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-r">
+    <div class="card">
+      <h3>📋 Your Posted Rooms</h3>
+      {% for room in my_rooms %}
+      <div style="border:1px solid #f0e6ff; border-radius:10px; padding:14px; margin-bottom:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:7px;">
+          <div style="font-size:0.9rem; font-weight:700; color:#333;">{{ room.address|truncatechars:35 }}</div>
+          <span class="badge {% if room.is_available %}bg-green{% else %}bg-gray{% endif %}">{% if room.is_available %}Available{% else %}Unavailable{% endif %}</span>
+        </div>
+        <div style="font-size:0.79rem; color:#888; margin-bottom:5px;">{{ room.details|truncatechars:60|default:"No details" }}</div>
+        <div style="font-size:0.97rem; font-weight:800; color:#6a0dad; margin-bottom:10px;">৳{{ room.monthly_price }} / month</div>
+        <div style="display:flex; gap:8px;">
+          <form method="POST" action="{% url 'toggle_room' room.id %}">{% csrf_token %}
+            <button type="submit" class="btn btn-l" style="font-size:0.76rem; padding:5px 12px;">
+              {% if room.is_available %}Mark Unavailable{% else %}Mark Available{% endif %}
+            </button>
+          </form>
+          <form method="POST" action="{% url 'delete_room' room.id %}" onsubmit="return confirm('Delete this room?')">{% csrf_token %}
+            <button type="submit" class="btn btn-r" style="font-size:0.76rem; padding:5px 12px;">Delete</button>
+          </form>
+        </div>
+      </div>
+      {% empty %}
+      <p style="color:#bbb; text-align:center; padding:30px 20px;">No rooms posted yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
