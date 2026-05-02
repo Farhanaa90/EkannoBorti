@@ -1,0 +1,75 @@
+{% extends 'manager/base_manager.html' %}
+{% block title %}Member Profile{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{% url 'manage_members' %}">← Back to Members</a>
+
+<div style="background:#fff; border-radius:12px; padding:26px; box-shadow:0 2px 12px rgba(106,13,173,0.08); margin-bottom:18px; display:flex; align-items:center; gap:22px; flex-wrap:wrap;">
+  <div style="width:76px; height:76px; border-radius:50%; background:#e0c8ff; display:flex; align-items:center; justify-content:center; font-size:1.9rem; font-weight:700; color:#6a0dad; flex-shrink:0;">
+    {{ member.user.user.username|first|upper }}
+  </div>
+  <div>
+    <div style="font-size:1.25rem; font-weight:800; color:#4a0090;">{{ member.user.user.get_full_name|default:member.user.user.username }}</div>
+    <div style="font-size:0.84rem; color:#777; margin-top:4px;">@{{ member.user.user.username }} · {{ member.user.user.email }}</div>
+    <span class="badge bg-blue" style="margin-top:8px; display:inline-block;">Mess Member</span>
+  </div>
+</div>
+
+<div class="card">
+  <h3>👤 Personal Information</h3>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+    <div>
+      <div style="font-size:0.74rem; font-weight:600; color:#999; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">Full Name</div>
+      <div style="font-size:0.88rem; color:#333; font-weight:500;">{{ member.user.user.get_full_name|default:"—" }}</div>
+    </div>
+    <div>
+      <div style="font-size:0.74rem; font-weight:600; color:#999; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">Phone</div>
+      <div style="font-size:0.88rem; color:#333; font-weight:500;">{{ member.user.phone|default:"—" }}</div>
+    </div>
+    <div>
+      <div style="font-size:0.74rem; font-weight:600; color:#999; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">Gender</div>
+      <div style="font-size:0.88rem; color:#333; font-weight:500;">{{ member.user.gender|title|default:"—" }}</div>
+    </div>
+    <div>
+      <div style="font-size:0.74rem; font-weight:600; color:#999; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">Date of Birth</div>
+      <div style="font-size:0.88rem; color:#333; font-weight:500;">{{ member.user.date_of_birth|default:"—" }}</div>
+    </div>
+    <div style="grid-column:1/-1;">
+      <div style="font-size:0.74rem; font-weight:600; color:#999; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">Home Address</div>
+      <div style="font-size:0.88rem; color:#333; font-weight:500;">{{ member.user.address|default:"—" }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>🎓 Academic Information</h3>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+    <div>
+      <div style="font-size:0.74rem; font-weight:600; color:#999; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">Institution</div>
+      <div style="font-size:0.88rem; color:#333; font-weight:500;">{{ member.user.institution|default:"—" }}</div>
+    </div>
+    <div>
+      <div style="font-size:0.74rem; font-weight:600; color:#999; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">Student ID</div>
+      <div style="font-size:0.88rem; color:#333; font-weight:500;">{{ member.user.student_id|default:"—" }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>🏠 Mess Information</h3>
+  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px;">
+    <div>
+      <div style="font-size:0.74rem; font-weight:600; color:#999; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">Joined Date</div>
+      <div style="font-size:0.88rem; color:#333; font-weight:500;">{{ member.joined_date }}</div>
+    </div>
+    <div>
+      <div style="font-size:0.74rem; font-weight:600; color:#999; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">Total Due</div>
+      <div style="font-size:0.88rem; font-weight:700; color:{% if member.total_due > 0 %}#dc2626{% else %}#16a34a{% endif %};">৳{{ member.total_due }}</div>
+    </div>
+    <div>
+      <div style="font-size:0.74rem; font-weight:600; color:#999; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">Status</div>
+      <span class="badge {% if member.is_active %}bg-green{% else %}bg-yellow{% endif %}">{% if member.is_active %}Active{% else %}Inactive{% endif %}</span>
+    </div>
+  </div>
+</div>
+{% endblock %}

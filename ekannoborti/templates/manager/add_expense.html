@@ -1,0 +1,64 @@
+{% extends 'manager/base_manager.html' %}
+{% block title %}Add Expense{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{% url 'dashboard' %}">← Back to Home</a>
+<div class="page-title">💰 Add Expense</div>
+<div class="page-sub">{{ mess.mess_name }} · Monthly expenses are split equally among all active members</div>
+
+<div class="stats">
+  <div class="stat"><div class="lbl">This Month Total</div><div class="val" style="color:#6a0dad;">৳{{ total_this_month }}</div></div>
+  <div class="stat"><div class="lbl">Per Member Share</div><div class="val" style="color:#2563eb;">৳{{ per_member }}</div></div>
+  <div class="stat"><div class="lbl">Active Members</div><div class="val" style="color:#16a34a;">{{ active_count }}</div></div>
+</div>
+
+<div class="two-col">
+  <div class="col-l">
+    <div class="card">
+      <h3>➕ Add New Expense</h3>
+      <form method="POST" action="{% url 'add_expense' %}">
+        {% csrf_token %}
+        <div class="fg"><label>Title</label><input type="text" name="title" placeholder="e.g. Grocery, Gas Bill" required/></div>
+        <div class="fg"><label>Description (Optional)</label><textarea name="description" placeholder="Brief description..."></textarea></div>
+        <div class="fg">
+          <label>Total Amount</label>
+          <div class="iw"><span>৳</span><input type="number" name="total_amount" placeholder="0" min="0" step="0.01" required/></div>
+        </div>
+        <div class="fg"><label>Expense Month</label><input type="month" name="expense_month" required/></div>
+        <button type="submit" class="btn btn-p btn-full">Add & Split Expense</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-r">
+    <div class="card" style="background:#f3eeff; border:2px solid #e8d5ff;">
+      <h3>📊 Split Info</h3>
+      <div style="font-size:0.85rem; color:#555; line-height:2;">
+        <div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #e8d5ff;"><span>Active Members</span><span style="font-weight:700; color:#4a0090;">{{ active_count }}</span></div>
+        <div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #e8d5ff;"><span>This Month Total</span><span style="font-weight:700; color:#4a0090;">৳{{ total_this_month }}</span></div>
+        <div style="display:flex; justify-content:space-between; padding:5px 0;"><span style="font-weight:700;">Each Member Pays</span><span style="font-weight:800; color:#6a0dad; font-size:1rem;">৳{{ per_member }}</span></div>
+      </div>
+      <p style="font-size:0.75rem; color:#aaa; margin-top:10px;">New expenses are automatically split and added to each member's due.</p>
+    </div>
+
+    <div class="card">
+      <h3>📋 This Month's Expenses</h3>
+      <table>
+        <tr><th>Title</th><th>Amount</th><th>Per Member</th></tr>
+        {% for e in month_expenses %}
+        <tr>
+          <td>{{ e.title }}</td>
+          <td>৳{{ e.total_amount }}</td>
+          <td><span class="badge bg-purple">৳{{ e.per_member_share }}</span></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" style="color:#bbb; text-align:center; padding:20px;">No expenses this month.</td></tr>
+        {% endfor %}
+        {% if month_expenses %}
+        <tr style="font-weight:700;"><td>Total</td><td>৳{{ total_this_month }}</td><td><span class="badge bg-purple">৳{{ per_member }}</span></td></tr>
+        {% endif %}
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

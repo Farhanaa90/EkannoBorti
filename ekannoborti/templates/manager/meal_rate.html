@@ -1,0 +1,85 @@
+{% extends 'manager/base_manager.html' %}
+{% block title %}Set Meal Rate{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{% url 'dashboard' %}">← Back to Home</a>
+<div class="page-title">🍽️ Set Meal Rate</div>
+<div class="page-sub">{{ mess.mess_name }} · Set daily meal rates for Breakfast, Lunch, and Dinner</div>
+
+{% if current_rate %}
+<div class="card">
+  <h3>📌 Current Active Rate</h3>
+  <div style="display:flex; gap:14px; flex-wrap:wrap;">
+    <div style="flex:1; min-width:110px; background:#f3eeff; border-radius:10px; padding:16px; text-align:center; border:2px solid #e8d5ff;">
+      <div style="font-size:1.5rem;">🌅</div>
+      <div style="font-size:0.74rem; color:#888; margin:5px 0;">Breakfast</div>
+      <div style="font-size:1.2rem; font-weight:800; color:#6a0dad;">৳{{ current_rate.breakfast }}</div>
+      <span class="badge bg-green" style="margin-top:6px; display:inline-block;">Active</span>
+    </div>
+    <div style="flex:1; min-width:110px; background:#f3eeff; border-radius:10px; padding:16px; text-align:center; border:2px solid #e8d5ff;">
+      <div style="font-size:1.5rem;">🌞</div>
+      <div style="font-size:0.74rem; color:#888; margin:5px 0;">Lunch</div>
+      <div style="font-size:1.2rem; font-weight:800; color:#6a0dad;">৳{{ current_rate.lunch }}</div>
+      <span class="badge bg-green" style="margin-top:6px; display:inline-block;">Active</span>
+    </div>
+    <div style="flex:1; min-width:110px; background:#f3eeff; border-radius:10px; padding:16px; text-align:center; border:2px solid #e8d5ff;">
+      <div style="font-size:1.5rem;">🌙</div>
+      <div style="font-size:0.74rem; color:#888; margin:5px 0;">Dinner</div>
+      <div style="font-size:1.2rem; font-weight:800; color:#6a0dad;">৳{{ current_rate.dinner }}</div>
+      <span class="badge bg-green" style="margin-top:6px; display:inline-block;">Active</span>
+    </div>
+    <div style="flex:1; min-width:110px; background:#f3eeff; border-radius:10px; padding:16px; text-align:center; border:2px solid #e8d5ff;">
+      <div style="font-size:1.5rem;">📊</div>
+      <div style="font-size:0.74rem; color:#888; margin:5px 0;">Daily Total</div>
+      <div style="font-size:1.2rem; font-weight:800; color:#6a0dad;">৳{{ current_rate.daily_total }}</div>
+      <span class="badge bg-green" style="margin-top:6px; display:inline-block;">Active</span>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="card">
+  <h3>➕ Set New Meal Rate</h3>
+  <form method="POST" action="{% url 'set_meal_rate' %}">
+    {% csrf_token %}
+    <div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:14px;">
+      <div style="flex:1; min-width:140px;">
+        <label style="display:block; font-size:0.82rem; font-weight:600; color:#444; margin-bottom:5px;">🌅 Breakfast Rate</label>
+        <div class="iw"><span>৳</span><input type="number" name="breakfast" placeholder="0" min="0" step="0.5"/></div>
+      </div>
+      <div style="flex:1; min-width:140px;">
+        <label style="display:block; font-size:0.82rem; font-weight:600; color:#444; margin-bottom:5px;">🌞 Lunch Rate</label>
+        <div class="iw"><span>৳</span><input type="number" name="lunch" placeholder="0" min="0" step="0.5"/></div>
+      </div>
+      <div style="flex:1; min-width:140px;">
+        <label style="display:block; font-size:0.82rem; font-weight:600; color:#444; margin-bottom:5px;">🌙 Dinner Rate</label>
+        <div class="iw"><span>৳</span><input type="number" name="dinner" placeholder="0" min="0" step="0.5"/></div>
+      </div>
+    </div>
+    <div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:16px;">
+      <div class="fg" style="flex:1; min-width:150px;"><label>Start Date</label><input type="date" name="start_date" required/></div>
+      <div class="fg" style="flex:1; min-width:150px;"><label>End Date (Optional)</label><input type="date" name="end_date"/></div>
+    </div>
+    <button type="submit" class="btn btn-p">Save Meal Rate</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3>📋 Rate History</h3>
+  <table>
+    <tr><th>Breakfast</th><th>Lunch</th><th>Dinner</th><th>Start Date</th><th>End Date</th><th>Status</th></tr>
+    {% for r in rate_history %}
+    <tr>
+      <td>৳{{ r.breakfast }}</td>
+      <td>৳{{ r.lunch }}</td>
+      <td>৳{{ r.dinner }}</td>
+      <td>{{ r.start_date }}</td>
+      <td>{{ r.end_date|default:"—" }}</td>
+      <td><span class="badge {% if r.is_active %}bg-green{% else %}bg-gray{% endif %}">{% if r.is_active %}Current{% else %}Expired{% endif %}</span></td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6" style="color:#bbb; text-align:center; padding:20px;">No rates set yet.</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}
