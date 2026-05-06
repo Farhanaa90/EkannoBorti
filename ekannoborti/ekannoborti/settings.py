@@ -10,7 +10,7 @@ ALLOWED_HOSTS = []
 
 
 INSTALLED_APPS = [
-    'manager',
+    'members',
     'rooms',
     'users',
     'ekannoborti',

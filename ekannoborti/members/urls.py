@@ -1,0 +1,9 @@
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('member/dashboard/', views.member_dashboard, name='member_dashboard'),
+    path('member/log-meal/', views.log_meal, name='log_meal'),
+    path('member/expenses/', views.view_expenses, name='view_expenses'),
+    path('member/complaint/', views.file_complaint, name='file_complaint'),
+]
