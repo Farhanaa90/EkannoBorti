@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-5xl">
+
+    <!-- Welcome -->
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-purple-800">Welcome, {{ user.first_name|default:user.username }}!</h1>
+        <p class="text-gray-400 text-sm mt-1">Here's your mess summary for this month.</p>
+    </div>
+
+    <!-- Invitation / No Mess Warning -->
+    {% if not mess %}
+      {% if pending_invitation %}
+      <div class="bg-yellow-50 border border-yellow-300 rounded-xl px-5 py-4 mb-6">
+        <p class="font-bold text-yellow-800 mb-1">📨 Mess Invitation Pending!</p>
+        <p class="text-sm text-yellow-700 mb-3">
+          <strong>{{ pending_invitation.manager_username }}</strong> has invited you to join
+          <strong>{{ pending_invitation.mess_name }}</strong>.
+        </p>
+        <a href="{% url 'view_invitations' %}"
+           class="bg-purple-700 hover:bg-purple-800 text-white text-sm font-semibold px-4 py-2 rounded-lg transition">
+          View Invitation →
+        </a>
+      </div>
+      {% else %}
+      <div class="bg-red-50 border border-red-200 rounded-xl px-5 py-4 mb-6 text-sm text-red-700">
+        You are not assigned to any mess yet. Please wait for a manager invitation.
+      </div>
+      {% endif %}
+    {% endif %}
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-xl shadow-sm p-5 text-center border border-purple-100">
+            <p class="text-gray-400 text-xs mb-2">Total Meals</p>
+            <p class="text-3xl font-bold text-purple-700">{{ total_meals|default:"0" }}</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-5 text-center border border-yellow-100">
+            <p class="text-gray-400 text-xs mb-2">My Expense</p>
+            <p class="text-2xl font-bold text-yellow-500">{{ total_meal_cost|floatformat:0|default:"0" }} BDT</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-5 text-center border border-green-100">
+            <p class="text-gray-400 text-xs mb-2">Deposited</p>
+            <p class="text-2xl font-bold text-green-600">{{ total_deposited|floatformat:0|default:"0" }} BDT</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-5 text-center border border-red-100">
+            <p class="text-gray-400 text-xs mb-2">Due Amount</p>
+            <p class="text-2xl font-bold text-red-500">{{ total_due|floatformat:0|default:"0" }} BDT</p>
+        </div>
+    </div>
+
+    <!-- My Mess Info -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-purple-100">
+            <h3 class="font-bold text-purple-800 text-sm mb-3">My Mess</h3>
+            {% if mess %}
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between py-2 border-b border-gray-100">
+                    <span class="text-gray-500">Mess Name</span>
+                    <span class="font-bold text-purple-700">{{ mess.mess_name }}</span>
+                </div>
+                <div class="flex justify-between py-2 border-b border-gray-100">
+                    <span class="text-gray-500">Address</span>
+                    <span class="text-gray-600">{{ mess.address|default:"—" }}</span>
+                </div>
+            </div>
+            {% else %}
+              {% if pending_invitation %}
+              <p class="text-yellow-600 text-sm font-semibold">⏳ Invitation pending...</p>
+              <p class="text-gray-400 text-xs mt-1">
+                Once accepted, you will join <strong>{{ pending_invitation.mess_name }}</strong>.
+              </p>
+              {% else %}
+              <p class="text-gray-400 text-sm">Not assigned to any mess yet.</p>
+              <p class="text-gray-400 text-xs mt-1">Please contact your manager.</p>
+              {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}
