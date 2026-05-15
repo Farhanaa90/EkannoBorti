@@ -45,7 +45,7 @@ def register(request):
         if role == 'seeker':
             return redirect('seeker_dashboard')
         else:
-            return redirect('manager_dashboard')  # ✅ fixed
+            return redirect('member_dashboard')
 
     return render(request, 'register.html')
 
@@ -66,7 +66,7 @@ def login_view(request):
             elif profile.role == 'seeker':
                 return redirect('seeker_dashboard')
             else:
-                return redirect('manager_dashboard')  # ✅ fixed
+                return redirect('member_dashboard')
         else:
             messages.error(request, 'Invalid username or password!')
             return render(request, 'login.html')
@@ -136,7 +136,6 @@ def change_password(request):
 
     return render(request, 'users/change_password.html')
 
-
 @login_required
 def delete_account(request):
     if request.method == 'POST':
@@ -148,7 +147,6 @@ def delete_account(request):
 
     return render(request, 'users/delete_account.html')
 
-
 @login_required
 def seeker_dashboard(request):
     user_profile = UserProfile.objects.get(user=request.user)
@@ -159,3 +157,10 @@ def seeker_dashboard(request):
         'available_rooms': available_rooms,
     }
     return render(request, 'rooms/seeker_dashboard.html', context)
+
+@login_required
+def manager_dashboard(request):
+    if request.user.userprofile.role != 'manager':
+        messages.error(request, 'Access denied.')
+        return redirect('home')
+    return render(request, 'manager_dashboard.html')
