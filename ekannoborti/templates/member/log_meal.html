@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block title %}Log Meal{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-xl">
+
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-purple-950">Log Today's Meals</h1>
+    <p class="text-purple-400 text-sm mt-1">{{ today }}</p>
+  </div>
+
+  {% if rate %}
+  <div class="bg-white rounded-2xl border border-purple-100 px-6 py-5 mb-5">
+    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">Today's Rates</p>
+    <div class="flex divide-x divide-purple-100">
+      <div class="flex flex-col items-center flex-1">
+        <span class="text-xs text-gray-400 mb-1">Breakfast</span>
+        <span class="text-lg font-bold text-purple-700">{{ rate.breakfast }} BDT</span>
+      </div>
+      <div class="flex flex-col items-center flex-1">
+        <span class="text-xs text-gray-400 mb-1">Lunch</span>
+        <span class="text-lg font-bold text-purple-700">{{ rate.lunch }} BDT</span>
+      </div>
+      <div class="flex flex-col items-center flex-1">
+        <span class="text-xs text-gray-400 mb-1">Dinner</span>
+        <span class="text-lg font-bold text-purple-700">{{ rate.dinner }} BDT</span>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="bg-yellow-50 border border-yellow-200 rounded-2xl px-5 py-4 mb-5 text-sm text-yellow-700">
+    No meal rate set by manager yet. Cost will be calculated as 0.
+  </div>
+  {% endif %}
+
+  <div class="bg-white rounded-2xl border border-purple-100 p-6 mb-5">
+    <h3 class="text-sm font-bold text-purple-950 mb-5">
+      {% if existing_log %}Update{% else %}Add{% endif %} Today's Meal
+    </h3>
+
+    <form method="POST" class="space-y-3">
+      {% csrf_token %}
+
+      <label class="flex items-center justify-between border-2 rounded-2xl px-5 py-4 cursor-pointer transition-all
+        {% if existing_log and existing_log.breakfast %}border-purple-600 bg-purple-50{% else %}border-gray-100 hover:border-purple-200 hover:bg-purple-50{% endif %}">
+        <div class="flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-yellow-100 flex items-center justify-center text-xl flex-shrink-0">🌅</div>
+          <div>
+            <p class="text-sm font-semibold text-gray-800">Breakfast</p>
+            <p class="text-xs text-gray-400 mt-0.5">
+              {% if rate %}{{ rate.breakfast }} BDT{% else %}Rate not set{% endif %}
+            </p>
+          </div>
+        </div>
+        <div class="relative">
+          <input type="checkbox" name="breakfast"
+                 {% if existing_log and existing_log.breakfast %}checked{% endif %}
+                 class="sr-only peer"/>
+          <div class="w-12 h-6 bg-gray-200 rounded-full peer-checked:bg-purple-600 transition-colors"></div>
+          <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-all peer-checked:translate-x-6"></div>
+        </div>
+      </label>
+
+      <label class="flex items-center justify-between border-2 rounded-2xl px-5 py-4 cursor-pointer transition-all
+        {% if existing_log and existing_log.lunch %}border-purple-600 bg-purple-50{% else %}border-gray-100 hover:border-purple-200 hover:bg-purple-50{% endif %}">
+        <div class="flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-green-100 flex items-center justify-center text-xl flex-shrink-0">🍛</div>
+          <div>
+            <p class="text-sm font-semibold text-gray-800">Lunch</p>
+            <p class="text-xs text-gray-400 mt-0.5">
+              {% if rate %}{{ rate.lunch }} BDT{% else %}Rate not set{% endif %}
+            </p>
+          </div>
+        </div>
+        <div class="relative">
+          <input type="checkbox" name="lunch"
+                 {% if existing_log and existing_log.lunch %}checked{% endif %}
+                 class="sr-only peer"/>
+          <div class="w-12 h-6 bg-gray-200 rounded-full peer-checked:bg-purple-600 transition-colors"></div>
+          <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-all peer-checked:translate-x-6"></div>
+        </div>
+      </label>
+
+      <label class="flex items-center justify-between border-2 rounded-2xl px-5 py-4 cursor-pointer transition-all
+        {% if existing_log and existing_log.dinner %}border-purple-600 bg-purple-50{% else %}border-gray-100 hover:border-purple-200 hover:bg-purple-50{% endif %}">
+        <div class="flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-purple-100 flex items-center justify-center text-xl flex-shrink-0">🌙</div>
+          <div>
+            <p class="text-sm font-semibold text-gray-800">Dinner</p>
+            <p class="text-xs text-gray-400 mt-0.5">
+              {% if rate %}{{ rate.dinner }} BDT{% else %}Rate not set{% endif %}
+            </p>
+          </div>
+        </div>
+        <div class="relative">
+          <input type="checkbox" name="dinner"
+                 {% if existing_log and existing_log.dinner %}checked{% endif %}
+                 class="sr-only peer"/>
+          <div class="w-12 h-6 bg-gray-200 rounded-full peer-checked:bg-purple-600 transition-colors"></div>
+          <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-all peer-checked:translate-x-6"></div>
+        </div>
+      </label>
+
+      <button type="submit"
+        class="w-full bg-gradient-to-r from-purple-700 to-purple-600 hover:from-purple-800 hover:to-purple-700 text-white font-bold text-sm py-4 rounded-2xl transition-all mt-2 tracking-wide">
+        {% if existing_log %}Update Log{% else %}Save Log{% endif %}
+      </button>
+    </form>
+  </div>
+
+  {% if recent_logs %}
+  <div class="bg-white rounded-2xl border border-purple-100 p-6">
+    <h3 class="text-sm font-bold text-purple-950 mb-5">Recent Logs</h3>
+    <div>
+      {% for log in recent_logs %}
+      <div class="flex items-center justify-between py-3 border-b border-purple-50 last:border-0 last:pb-0">
+        <span class="text-xs text-gray-500 w-24">{{ log.log_date }}</span>
+        <div class="flex gap-2">
+          <span class="text-xs font-bold px-3 py-1 rounded-full
+            {% if log.breakfast %}bg-purple-100 text-purple-700{% else %}bg-gray-100 text-gray-300{% endif %}">B</span>
+          <span class="text-xs font-bold px-3 py-1 rounded-full
+            {% if log.lunch %}bg-purple-100 text-purple-700{% else %}bg-gray-100 text-gray-300{% endif %}">L</span>
+          <span class="text-xs font-bold px-3 py-1 rounded-full
+            {% if log.dinner %}bg-purple-100 text-purple-700{% else %}bg-gray-100 text-gray-300{% endif %}">D</span>
+        </div>
+        <span class="text-sm font-bold text-purple-700">{{ log.meal_cost }} BDT</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
