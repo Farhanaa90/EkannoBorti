@@ -84,14 +84,18 @@ class Deposit(models.Model):
         return f"{self.member.username} deposited {self.amount}"
 
 
-class Complaint(models.Model):
-    member = models.ForeignKey(User, on_delete=models.CASCADE, related_name='complaints')
-    mess = models.ForeignKey(Mess, on_delete=models.CASCADE, related_name='complaints')
-    complaint_text = models.TextField()
-    is_anonymous = models.BooleanField(default=True)
-    is_read = models.BooleanField(default=False)
-    submitted_at = models.DateTimeField(auto_now_add=True)
+class MessInvitation(models.Model):
+    STATUS_CHOICES = [
+        ('pending',  'Pending'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
+    ]
+    mess_name  = models.CharField(max_length=200)
+    mess_address = models.CharField(max_length=300, blank=True)
+    manager_username = models.CharField(max_length=150)
+    member     = models.ForeignKey(User, on_delete=models.CASCADE, related_name='invitations')
+    status     = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        name = "Anonymous" if self.is_anonymous else self.member.username
-        return f"{name} - {self.submitted_at.date()}"
+    def str(self):
+        return f"{self.manager_username} invited {self.member.username} to {self.mess_name}"
