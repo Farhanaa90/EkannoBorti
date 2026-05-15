@@ -2,12 +2,11 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-nac@$afwkzet*m^f4cm!-+w%$=fa#b801l(!rv)(d-1gxe%k(&'
+SECRET_KEY = 'django-insecure-$(&w_+ofaa@sz*p0k)7_-q^gl6q-i1&0f4s)py!06_u04ac&xq'
 
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 INSTALLED_APPS = [
     'members',
@@ -74,7 +73,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -84,6 +82,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
-
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'home'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
