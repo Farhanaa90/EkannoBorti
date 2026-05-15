@@ -11,7 +11,7 @@ class Room(models.Model):
     posted_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.mess.mess_name} - {self.address}"
+        return f"{self.posted_by.user.username} - {self.address}"
 
 
 class RoomRequest(models.Model):

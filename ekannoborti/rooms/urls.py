@@ -7,4 +7,6 @@ urlpatterns = [
     path('rooms/<int:room_id>/request/', views.send_request, name='send_request'),
     path('my_requests/', views.my_requests, name='my_requests'),
     path('seeker/dashboard/', views.seeker_dashboard, name='seeker_dashboard'),
+path('notifications/', views.seeker_notifications, name='seeker_notifications'),
+
 ]
