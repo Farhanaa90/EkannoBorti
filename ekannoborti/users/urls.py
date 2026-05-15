@@ -13,4 +13,5 @@ urlpatterns = [
     path('profile/delete/', views.delete_account, name='delete_account'),
 
     path('seeker/dashboard/', views.seeker_dashboard, name='seeker_dashboard'),
+path('manager/dashboard/', views.manager_dashboard, name='manager_dashboard'),
 ]
