@@ -1,3 +1,4 @@
+"""
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -99,3 +100,4 @@ class MessInvitation(models.Model):
 
     def str(self):
         return f"{self.manager_username} invited {self.member.username} to {self.mess_name}"
+"""

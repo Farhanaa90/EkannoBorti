@@ -1,3 +1,5 @@
+"""
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -329,3 +331,5 @@ def respond_invitation(request, invite_id):
             messages.info(request, "Invitation rejected.")
 
     return redirect('view_invitations')
+
+"""
