@@ -14,6 +14,7 @@ from managers.models import (
     Expense,
     Deposit,
     Notification,
+    Complaint,
 )
 
 
@@ -326,3 +327,83 @@ def respond_invitation(request, invite_id):
             messages.info(request, "Invitation rejected.")
 
     return redirect('view_invitations')
+
+@login_required
+def file_complaint(request):
+    if request.user.userprofile.role != 'member':
+        messages.error(request, 'Access denied.')
+        return redirect('home')
+
+    mess = get_mess(request.user)
+    if not mess:
+        messages.error(request, 'You are not assigned to any mess yet.')
+        return redirect('member_dashboard')
+
+    if request.method == 'POST':
+        complaint_text = request.POST.get('complaint_text', '').strip()
+
+        if not complaint_text:
+            messages.error(request, 'Complaint cannot be empty!')
+            return render(request, 'member/file_complaint.html')
+
+        Complaint.objects.create(
+            mess=mess,
+            text=complaint_text,
+            submitted_by=request.user,
+        )
+
+        Notification.objects.create(
+            mess=mess,
+            text="A new complaint has been submitted. (Anonymous)",
+            notif_type="complaint"
+        )
+
+        messages.success(request, 'Complaint submitted successfully!')
+        return redirect('member_dashboard')
+
+    return render(request, 'member/file_complaint.html')
+
+
+MEMBER_VISIBLE_TYPES = [
+    'rotation',
+    'meal_rate',
+    'expense',
+    'member_alert',
+    'member_invite',
+    'member_add',
+    'meal_log',
+]
+
+
+@login_required
+def member_notifications(request):
+    if request.user.userprofile.role != 'member':
+        return redirect('home')
+
+    mess = get_mess(request.user)
+    if not mess:
+        return redirect('member_dashboard')
+
+    mess_notifs = mess.notifications.filter(
+        notif_type__in=MEMBER_VISIBLE_TYPES
+    )
+
+    personal_notifs = Notification.objects.filter(
+        recipient=request.user,
+        notif_type__in=['deposit', 'complaint_feedback', 'member_invite']
+    )
+
+    all_notifs = sorted(
+        chain(mess_notifs, personal_notifs),
+        key=lambda n: n.created_at,
+        reverse=True
+    )
+
+    mess_notifs.update(is_read=True)
+    personal_notifs.update(is_read=True)
+
+    return render(request, 'member/notifications.html', {
+        'mess':          mess,
+        'notifications': all_notifs,
+        'notif_count':   len(all_notifs),
+    })

@@ -101,3 +101,18 @@ class MessInvitation(models.Model):
 
     def str(self):
         return f"{self.manager_username} invited {self.member.username} to {self.mess_name}"
+
+
+class Complaint(models.Model):
+    member = models.ForeignKey(User, on_delete=models.CASCADE, related_name='complaints')
+    mess = models.ForeignKey(Mess, on_delete=models.CASCADE, related_name='complaints')
+    complaint_text = models.TextField()
+    is_anonymous = models.BooleanField(default=True)
+    is_read = models.BooleanField(default=False)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        name = "Anonymous" if self.is_anonymous else self.member.username
+        return f"{name} - {self.submitted_at.date()}"
+        
+         
