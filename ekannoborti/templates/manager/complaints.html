@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block title %}View Complaints{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --purple: #7c3aed;
+    --purple-dark: #5b21b6;
+    --purple-light: #ede9fe;
+    --bg: #f5f3ff;
+    --white: #fff;
+    --text: #1e1b4b;
+    --muted: #6b7280;
+    --border: #ddd6fe;
+    --green: #16a34a;
+    --red: #dc2626;
+  }
+
+  .page-wrap { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+
+  .back-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--purple); text-decoration: none; font-size: 0.83rem;
+    font-weight: 700; margin-bottom: 20px; transition: opacity 0.2s;
+  }
+  .back-link:hover { opacity: 0.7; }
+
+  .page-title { font-size: 1.7rem; font-weight: 900; color: var(--text); margin-bottom: 4px; }
+  .page-sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 24px; }
+
+  .stats {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 14px; margin-bottom: 24px;
+  }
+  .stat {
+    background: var(--white); border-radius: 14px; padding: 18px 20px;
+    box-shadow: 0 2px 12px rgba(124,58,237,0.07); border: 1.5px solid var(--border);
+  }
+  .lbl { font-size: 0.75rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .val { font-size: 1.6rem; font-weight: 900; }
+
+  .toolbar { display: flex; gap: 8px; margin-bottom: 20px; }
+  .fbtn {
+    display: inline-block; padding: 7px 18px; border-radius: 9px;
+    font-size: 0.82rem; font-weight: 700; text-decoration: none;
+    background: var(--white); color: var(--muted); border: 1.5px solid var(--border);
+    transition: all 0.2s; cursor: pointer;
+  }
+  .fbtn.on, .fbtn:hover { background: var(--purple); color: #fff; border-color: var(--purple); }
+
+  .complaint-card {
+    background: var(--white); border-radius: 14px; padding: 18px 20px;
+    box-shadow: 0 2px 10px rgba(124,58,237,0.06); margin-bottom: 12px;
+    transition: box-shadow 0.2s;
+  }
+  .complaint-card:hover { box-shadow: 0 4px 18px rgba(124,58,237,0.12); }
+  .complaint-card.unread { border-left: 4px solid var(--purple); }
+  .complaint-card.read { border-left: 4px solid var(--border); }
+
+  .c-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px; flex-wrap: wrap; gap: 8px;
+  }
+  .c-badges { display: flex; gap: 8px; align-items: center; }
+  .c-time { font-size: 0.75rem; color: #bbb; }
+  .c-text { font-size: 0.86rem; color: #555; line-height: 1.7; margin-bottom: 12px; }
+
+  .badge { display: inline-block; border-radius: 6px; padding: 3px 9px; font-size: 0.72rem; font-weight: 800; }
+  .bg-purple { background: #ede9fe; color: #5b21b6; }
+  .bg-red { background: #fee2e2; color: #dc2626; }
+  .bg-green { background: #dcfce7; color: #16a34a; }
+
+  .btn {
+    display: inline-flex; align-items: center; border: none;
+    border-radius: 9px; padding: 7px 16px; font-family: inherit;
+    font-weight: 800; font-size: 0.78rem; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-l { background: var(--purple-light); color: var(--purple-dark); }
+  .btn-l:hover { background: #ddd6fe; }
+
+  .read-stamp {
+    background: #dcfce7; color: #16a34a; font-size: 0.78rem;
+    font-weight: 800; padding: 7px 16px; border-radius: 9px; display: inline-block;
+  }
+
+  .empty { text-align: center; padding: 60px 20px; color: #bbb; }
+  .empty-icon { font-size: 2.5rem; margin-bottom: 10px; }
+</style>
+
+<div class="page-wrap">
+  <div class="page-title">Complaint Box</div>
+  <div class="page-sub">{{ mess.mess_name }} · All complaints are anonymous — only you can see them</div>
+
+  <div class="stats">
+    <div class="stat"><div class="lbl">Total</div><div class="val" style="color:#7c3aed;">{{ total }}</div></div>
+    <div class="stat"><div class="lbl">Unread</div><div class="val" style="color:#dc2626;">{{ unread }}</div></div>
+    <div class="stat"><div class="lbl">Read</div><div class="val" style="color:#16a34a;">{{ read }}</div></div>
+  </div>
+
+  <div class="toolbar">
+    <a href="?filter=all"    class="fbtn {% if f == 'all' %}on{% endif %}">All</a>
+    <a href="?filter=unread" class="fbtn {% if f == 'unread' %}on{% endif %}">Unread</a>
+    <a href="?filter=read"   class="fbtn {% if f == 'read' %}on{% endif %}">Read</a>
+  </div>
+
+  {% for c in complaints %}
+  <div class="complaint-card {% if not c.is_read %}unread{% else %}read{% endif %}">
+    <div class="c-header">
+      <div class="c-badges">
+        <span class="badge bg-purple">Anonymous</span>
+        <span class="badge {% if not c.is_read %}bg-red{% else %}bg-green{% endif %}">
+          {% if not c.is_read %}Unread{% else %}Read{% endif %}
+        </span>
+      </div>
+      <span class="c-time">{{ c.submitted_at|timesince }} ago</span>
+    </div>
+    <p class="c-text">{{ c.text }}</p>
+    {% if not c.is_read %}
+    <form method="POST" action="{% url 'mark_complaint_read' c.id %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-l">Mark as Read</button>
+    </form>
+    {% else %}
+    <span class="read-stamp">✓ Read</span>
+    {% endif %}
+  </div>
+  {% empty %}
+  <div class="empty">
+    <div class="empty-icon"></div>
+    <p>No complaints found.</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
