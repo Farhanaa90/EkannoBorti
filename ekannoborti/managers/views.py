@@ -545,7 +545,9 @@ def manager_log_meal(request):
         'recent_logs':   recent_logs,
         'unread_notifs': unread_notifs(mess),
     })
-    @manager_required
+    
+    
+@manager_required
 def notifications(request):
     mess = get_mess(request)
     if not mess:
@@ -564,7 +566,8 @@ def notifications(request):
     })
     
     
-    def view_complaints(request):
+@manager_required
+def view_complaints(request):
     mess = get_mess(request)
     if not mess:
         return redirect('manager_dashboard')
@@ -601,7 +604,7 @@ def mark_complaint_read(request, complaint_id):
     return redirect('view_complaints')
     
     
-    @manager_required
+@manager_required
 def manager_rotation(request):
     mess = get_mess(request)
     if not mess:
