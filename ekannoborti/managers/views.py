@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.db.models import Sum
 from users.models import UserProfile
 from rooms.models import Room, RoomRequest
-from .models import Mess, MessMember, MealRate, Expense, Deposit
+from .models import Mess, MessMember, MealRate, Expense, Deposit,Complaint, ManagerRotation, Notification
 from members.models import MessInvitation
 from members.models import MealLog, Mess as MemberMess
 
@@ -545,3 +545,100 @@ def manager_log_meal(request):
         'recent_logs':   recent_logs,
         'unread_notifs': unread_notifs(mess),
     })
+    @manager_required
+def notifications(request):
+    mess = get_mess(request)
+    if not mess:
+        return redirect('manager_dashboard')
+
+    notifs = mess.notifications.filter(
+        notif_type__in=['manager_only', 'room_request', 'complaint']
+    ).order_by('-created_at')
+
+    notifs.update(is_read=True)
+
+    return render(request, 'managers/notifications.html', {
+        'mess':          mess,
+        'notifications': notifs,
+        'unread_notifs': 0,
+    })
+    
+    
+    def view_complaints(request):
+    mess = get_mess(request)
+    if not mess:
+        return redirect('manager_dashboard')
+    f  = request.GET.get('filter', 'all')
+    qs = mess.complaints.all().order_by('-submitted_at')
+    if f == 'unread':
+        qs = qs.filter(is_read=False)
+    elif f == 'read':
+        qs = qs.filter(is_read=True)
+    return render(request, 'managers/complaints.html', {
+        'mess':          mess,
+        'complaints':    qs,
+        'total':         mess.complaints.count(),
+        'unread':        mess.complaints.filter(is_read=False).count(),
+        'read':          mess.complaints.filter(is_read=True).count(),
+        'f':             f,
+        'unread_notifs': unread_notifs(mess),
+    })
+
+
+@manager_required
+def mark_complaint_read(request, complaint_id):
+    mess = get_mess(request)
+    c    = get_object_or_404(Complaint, id=complaint_id, mess=mess)
+    if request.method == 'POST':
+        c.is_read = True
+        c.save()
+        if c.submitted_by:
+            Notification.objects.create(
+                recipient=c.submitted_by,
+                text="Your complaint has been reviewed and acknowledged by the manager.",
+                notif_type="complaint_feedback"
+            )
+    return redirect('view_complaints')
+    
+    
+    @manager_required
+def manager_rotation(request):
+    mess = get_mess(request)
+    if not mess:
+        return redirect('manager_dashboard')
+
+    if request.method == 'POST':
+        new_manager_id = request.POST.get('new_manager')
+        term_months    = int(request.POST.get('term_months', 6))
+        rotation_date  = request.POST.get('rotation_date')
+        notes          = request.POST.get('notes', '').strip()
+        new_mgr        = get_object_or_404(UserProfile, id=new_manager_id)
+        ManagerRotation.objects.create(
+            mess=mess, outgoing_manager=request.user.userprofile,
+            incoming_manager=new_mgr, term_months=term_months,
+            rotation_date=rotation_date, notes=notes
+        )
+        old_mgr      = mess.manager
+        old_mgr.role = 'member'
+        old_mgr.save()
+        mess.manager = new_mgr
+        mess.save()
+        new_mgr.role = 'manager'
+        new_mgr.save()
+        Notification.objects.create(
+            mess=mess,
+            text=f"{new_mgr.user.username} is now the new manager.",
+            notif_type="rotation"
+        )
+        messages.success(request, f"{new_mgr.user.username} is now the new manager!")
+        return redirect('home')
+
+    eligible = mess.members.filter(is_active=True).exclude(user=request.user.userprofile)
+    history  = ManagerRotation.objects.filter(mess=mess).order_by('rotation_date')
+    return render(request, 'managers/rotation.html', {
+        'mess':          mess,
+        'eligible':      eligible,
+        'history':       history,
+        'unread_notifs': unread_notifs(mess),
+    })
+    

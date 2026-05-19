@@ -16,4 +16,8 @@ urlpatterns = [
     path('managers/room-requests/', views.room_requests, name='room_requests'),
     path('managers/room-requests/<int:req_id>/respond/', views.respond_request, name='respond_request'),
     path('managers/log-meal/', views.manager_log_meal, name='manager_log_meal'),
+     path('managers/notifications/', views.notifications, name='notifications'),
+ path('managers/complaints/', views.view_complaints, name='view_complaints'),
+ path('managers/complaints/<int:complaint_id>/read/', views.mark_complaint_read, name='mark_complaint_read'),
+ path('managers/rotation/', views.manager_rotation, name='manager_rotation'),
 ]
