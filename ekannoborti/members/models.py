@@ -1,4 +1,3 @@
-"""
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -85,6 +84,8 @@ class Deposit(models.Model):
         return f"{self.member.username} deposited {self.amount}"
 
 
+
+
 class MessInvitation(models.Model):
     STATUS_CHOICES = [
         ('pending',  'Pending'),
@@ -100,4 +101,3 @@ class MessInvitation(models.Model):
 
     def str(self):
         return f"{self.manager_username} invited {self.member.username} to {self.mess_name}"
-"""

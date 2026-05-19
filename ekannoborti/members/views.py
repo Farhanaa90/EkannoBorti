@@ -1,5 +1,3 @@
-"""
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -15,7 +13,6 @@ from managers.models import (
     MealRate,
     Expense,
     Deposit,
-    Complaint,
     Notification,
 )
 
@@ -70,7 +67,7 @@ def member_dashboard(request):
             log_date__month=now.month,
             log_date__year=now.year
         )
-        total_meal_cost = sum(l.meal_cost for l in now_month_logs)
+        total_meal_cost = round(sum(l.meal_cost for l in now_month_logs), 2)
         total_meals     = now_month_logs.count()
         breakfast_count = now_month_logs.filter(breakfast=True).count()
         lunch_count     = now_month_logs.filter(lunch=True).count()
@@ -86,19 +83,17 @@ def member_dashboard(request):
             expense_month__month=now.month
         )
         total_all_expenses  = sum(e.total_amount for e in expenses)
-        total_expense_share = round(
-            total_all_expenses / active_count, 2
-        ) if active_count else 0
+        total_expense_share = round(total_all_expenses / active_count, 2) if active_count else 0
         recent_expenses = expenses.order_by('-created_at')[:4]
 
         my_member = get_my_member_obj(request.user, mess)
         if my_member:
             my_deposits     = Deposit.objects.filter(mess=mess, member=my_member)
-            total_deposited = sum(d.amount for d in my_deposits)
+            total_deposited = round(sum(d.amount for d in my_deposits), 2)
 
         current_rate = mess.meal_rates.filter(is_active=True).first()
 
-    total_due = (total_meal_cost + total_expense_share) - total_deposited
+    total_due = round((total_meal_cost + total_expense_share) - total_deposited, 2)
 
     pending_invitation = MessInvitation.objects.filter(
         member=request.user,
@@ -144,11 +139,12 @@ def log_meal(request):
         lunch     = request.POST.get('lunch') == 'on'
         dinner    = request.POST.get('dinner') == 'on'
 
-        cost = 0
+        cost = 0.0
         if current_rate:
             if breakfast: cost += current_rate.breakfast
             if lunch:     cost += current_rate.lunch
             if dinner:    cost += current_rate.dinner
+        cost = round(cost, 2)
 
         member_mess = get_member_mess(mess)
 
@@ -233,9 +229,7 @@ def view_expenses(request):
         e.share_amount = round(e.total_amount / active_count, 2) if active_count else 0
         expenses.append(e)
 
-    total_expense_share = round(
-        sum(e.total_amount for e in expenses_qs) / active_count, 2
-    ) if active_count else 0
+    total_expense_share = round(sum(e.total_amount for e in expenses_qs) / active_count, 2) if active_count else 0
 
     my_member       = get_my_member_obj(request.user, mess)
     my_deposits     = []
@@ -245,15 +239,15 @@ def view_expenses(request):
         my_deposits = Deposit.objects.filter(
             mess=mess, member=my_member
         ).order_by('-deposit_date')
-        total_deposited = sum(d.amount for d in my_deposits)
+        total_deposited = round(sum(d.amount for d in my_deposits), 2)
 
     meal_logs = MealLog.objects.filter(
         member=request.user,
         log_date__month=now.month,
         log_date__year=now.year
     )
-    total_meal_cost = sum(l.meal_cost for l in meal_logs)
-    total_due       = (total_expense_share + total_meal_cost) - total_deposited
+    total_meal_cost = round(sum(l.meal_cost for l in meal_logs), 2)
+    total_due = round((total_expense_share + total_meal_cost) - total_deposited, 2)
 
     return render(request, 'member/view_expenses.html', {
         'expenses':            expenses,
@@ -264,6 +258,7 @@ def view_expenses(request):
         'total_due':           total_due,
         'current_month':       now.strftime('%B %Y'),
     })
+
 
 
 @login_required
@@ -331,5 +326,3 @@ def respond_invitation(request, invite_id):
             messages.info(request, "Invitation rejected.")
 
     return redirect('view_invitations')
-
-"""
