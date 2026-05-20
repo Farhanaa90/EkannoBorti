@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% block title %}Record Deposit{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-purple-800">Record Deposit</h1>
+    <p class="text-gray-400 text-sm mt-1">Record deposits made by members for mess expenses.</p>
+  </div>
+
+  <div class="grid grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded-xl shadow-sm p-5 border text-center">
+      <p class="text-xs text-gray-400">Total Deposited ({{ current_month }})</p>
+      <p class="text-2xl font-bold text-green-600">BDT {{ this_month }}</p>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm p-5 border text-center">
+      <p class="text-xs text-gray-400">Total Expense</p>
+      <p class="text-2xl font-bold text-red-500">BDT {{ total_expense }}</p>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm p-5 border text-center">
+      <p class="text-xs text-gray-400">Balance</p>
+      <p class="text-2xl font-bold text-purple-700">BDT {{ balance }}</p>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+    <h3 class="font-bold text-purple-800 mb-4">Record New Deposit</h3>
+
+    <form method="POST">
+      {% csrf_token %}
+
+      <div class="grid md:grid-cols-2 gap-4">
+
+        <div class="relative">
+          <label class="text-xs text-gray-500">Select Member</label>
+          <select name="member" required
+            class="w-full mt-1 border rounded-lg px-3 py-2 text-sm bg-white appearance-none focus:ring-2 focus:ring-purple-300">
+            <option value="">— Select Member —</option>
+            {% for member in members %}
+            <option value="{{ member.id }}">{{ member.user.user.username }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label class="text-xs text-gray-500">Amount</label>
+          <input type="number" name="amount" step="0.01" required
+            class="w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-300">
+        </div>
+
+        <div>
+          <label class="text-xs text-gray-500">Deposit Date</label>
+          <input type="date" name="deposit_date" required
+            class="w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-300">
+        </div>
+
+        <div>
+          <label class="text-xs text-gray-500">Month</label>
+          <select name="month" required
+            class="w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-300">
+            {% for month in month_choices %}
+            <option value="{{ month.value }}">{{ month.label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- NOTE -->
+        <div class="md:col-span-2">
+          <label class="text-xs text-gray-500">Note</label>
+          <textarea name="note"
+            class="w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-300"></textarea>
+        </div>
+
+      </div>
+
+      <button type="submit"
+        class="mt-4 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg">
+        Record Deposit
+      </button>
+
+    </form>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="bg-white rounded-xl shadow-sm p-6">
+    <div class="flex justify-between mb-4">
+      <h3 class="font-bold text-purple-800">Deposit History</h3>
+
+      <form method="GET">
+        <select name="filter_month" onchange="this.form.submit()"
+          class="border rounded-lg px-3 py-1 text-sm">
+          {% for month in month_choices %}
+          <option value="{{ month.value }}" {% if month.value == selected_month %}selected{% endif %}>
+            {{ month.label }}
+          </option>
+          {% endfor %}
+        </select>
+      </form>
+    </div>
+
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="bg-purple-50">
+          <th class="p-2 text-left">Member</th>
+          <th class="p-2">Amount</th>
+          <th class="p-2">Date</th>
+          <th class="p-2">Note</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for d in deposits %}
+        <tr class="border-b">
+          <td class="p-2">{{ d.member.user.user.username }}</td>
+          <td class="p-2 text-green-600 font-bold">BDT {{ d.amount }}</td>
+          <td class="p-2">{{ d.deposit_date }}</td>
+          <td class="p-2">{{ d.note|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="text-center text-gray-400 py-6">
+            No deposits found
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  </div>
+
+</div>
+{% endblock %}
