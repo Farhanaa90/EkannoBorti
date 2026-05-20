@@ -1,0 +1,474 @@
+{% extends 'base.html' %}
+{% block title %}Manage Members{% endblock %}
+
+{% block content %}
+
+<div id="addModal" class="overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Send Invitation</h3>
+      <button class="modal-close" onclick="closeModal()" aria-label="Close">&times;</button>
+    </div>
+    <form method="POST" action="{% url 'manage_members' %}">
+      {% csrf_token %}
+      <div class="fg">
+        <label>Username</label>
+        <div class="input-wrap">
+          <span class="input-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          </span>
+          <input type="text" name="username" placeholder="Enter member's username" required/>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="submit" class="btn-p">Send Invitation</button>
+        <button type="button" class="btn-ghost" onclick="closeModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="page-wrap">
+
+  <div class="ph-row">
+    <div>
+      <div class="page-title">Manage Members</div>
+      <div class="page-sub">{{ mess.mess_name }} &middot; Add, view and manage mess members</div>
+    </div>
+    <button class="btn-p" onclick="openModal()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Send Invitation
+    </button>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon purple">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div>
+        <div class="stat-lbl">Total Members</div>
+        <div class="stat-val purple">{{ total }}</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div>
+        <div class="stat-lbl">Active</div>
+        <div class="stat-val green">{{ active }}</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon amber">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div>
+        <div class="stat-lbl">Inactive</div>
+        <div class="stat-val amber">{{ inactive }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <form method="GET" style="display:flex; gap:10px; flex:1; flex-wrap:wrap; align-items:center;">
+      <div class="search-wrap">
+        <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="sbox" type="text" name="search" placeholder="Search by username..." value="{{ search }}"/>
+      </div>
+      <select class="sbox select" name="status" onchange="this.form.submit()">
+        <option value="all"      {% if status_f == 'all' %}selected{% endif %}>All Status</option>
+        <option value="active"   {% if status_f == 'active' %}selected{% endif %}>Active</option>
+        <option value="inactive" {% if status_f == 'inactive' %}selected{% endif %}>Inactive</option>
+      </select>
+      <button type="submit" class="btn-outline">Search</button>
+    </form>
+  </div>
+
+  {% if pending_invitations %}
+  <div class="inv-box">
+    <div class="inv-title">📨 Pending Invitations</div>
+    {% for inv in pending_invitations %}
+    <div class="inv-row">
+      <div>
+        <span class="inv-name">{{ inv.member.username }}</span>
+        <span class="inv-date">Invited {{ inv.created_at|date:"M d, Y" }}</span>
+      </div>
+      <span class="badge badge-amber">Pending</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="members-list">
+    {% for m in members %}
+    <div class="member-card">
+      <div class="member-avatar">
+        {% if m.user.profile_picture %}
+        <img src="{{ m.user.profile_picture.url }}" alt="Profile" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+        {% else %}
+        {{ m.user.user.get_full_name|default:m.user.user.username|slice:":2"|upper }}
+        {% endif %}
+      </div>
+      <div class="member-info">
+        <div class="member-name">{{ m.user.user.get_full_name|default:m.user.user.username }}</div>
+        <div class="member-meta">
+          <span>@{{ m.user.user.username }}</span>
+          <span class="dot">&bull;</span>
+          <span>Joined {{ m.joined_date }}</span>
+        </div>
+      </div>
+      <div class="member-stats">
+        <div class="mstat">
+          <div class="mstat-lbl">Due Amount</div>
+          <div class="mstat-val {% if m.total_due > 0 %}red{% else %}green{% endif %}">
+            BDT {{ m.total_due }}
+          </div>
+        </div>
+        <div class="mstat">
+          <div class="mstat-lbl">Status</div>
+          <span class="badge {% if m.is_active %}badge-green{% else %}badge-amber{% endif %}">
+            {% if m.is_active %}Active{% else %}Inactive{% endif %}
+          </span>
+        </div>
+      </div>
+      <div class="member-actions">
+        <a href="{% url 'view_member_profile' m.id %}" class="btn-outline btn-sm">View Profile</a>
+        <form method="POST" action="{% url 'remove_member' m.id %}" onsubmit="return confirm('Remove {{ m.user.user.username }} from mess?')">
+          {% csrf_token %}
+          <button type="submit" class="btn-danger btn-sm">Remove</button>
+        </form>
+      </div>
+    </div>
+    {% empty %}
+    <div class="empty-state">
+      <div class="empty-icon">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#c4b0e8" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <p class="empty-title">No members yet</p>
+      <p class="empty-sub">Click "Send Invitation" to get started.</p>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+.page-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 28px 20px 72px;
+}
+
+.ph-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.page-title { font-size: 1.25rem; font-weight: 800; color: #3b0082; letter-spacing: -0.3px; }
+.page-sub { font-size: 0.8rem; color: #9e8bb8; margin-top: 4px; font-weight: 500; }
+
+.btn-p {
+  background: #7c22d4;
+  color: #fff;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 9px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: background 0.15s, transform 0.1s;
+}
+.btn-p:hover { background: #6819b8; }
+.btn-p:active { transform: scale(0.97); }
+
+.btn-outline {
+  background: #fff;
+  color: #7c22d4;
+  border: 1.5px solid #dcc9f8;
+  padding: 8px 16px;
+  border-radius: 9px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: border-color 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+.btn-outline:hover { border-color: #a86ef0; background: #faf6ff; }
+
+.btn-ghost {
+  background: transparent;
+  color: #9e8bb8;
+  border: 1.5px solid #ede6f8;
+  padding: 9px 18px;
+  border-radius: 9px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-ghost:hover { background: #faf6ff; }
+
+.btn-danger {
+  background: #fff;
+  color: #dc2626;
+  border: 1.5px solid #fecaca;
+  padding: 8px 16px;
+  border-radius: 9px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.btn-danger:hover { background: #fef2f2; }
+.btn-sm { padding: 6px 13px; font-size: 0.76rem; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px 18px;
+  border: 1px solid #f0e6ff;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: box-shadow 0.15s;
+}
+.stat-card:hover { box-shadow: 0 4px 20px rgba(124,34,212,0.09); }
+.stat-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.stat-icon.purple { background: #f0e6ff; color: #7c22d4; }
+.stat-icon.green  { background: #dcfce7; color: #16a34a; }
+.stat-icon.amber  { background: #fef3c7; color: #d97706; }
+.stat-lbl { font-size: 0.73rem; color: #b0a0c8; font-weight: 600; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.4px; }
+.stat-val { font-size: 1.7rem; font-weight: 800; line-height: 1; }
+.stat-val.purple { color: #7c22d4; }
+.stat-val.green  { color: #16a34a; }
+.stat-val.amber  { color: #d97706; }
+
+.toolbar {
+  background: #fff;
+  border-radius: 13px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  border: 1px solid #f0e6ff;
+}
+.search-wrap { position: relative; flex: 1; min-width: 180px; }
+.search-icon {
+  position: absolute; left: 12px; top: 50%;
+  transform: translateY(-50%);
+  color: #c0aee0; pointer-events: none;
+}
+.sbox {
+  width: 100%;
+  border: 1.5px solid #ede6f8;
+  border-radius: 9px;
+  padding: 9px 12px 9px 36px;
+  font-size: 0.82rem;
+  color: #444;
+  outline: none;
+  background: #faf8ff;
+  transition: border-color 0.15s;
+  font-family: inherit;
+}
+.sbox:focus { border-color: #a855f7; }
+.sbox.select { padding-left: 12px; flex: unset; width: auto; }
+
+/* Pending Invitations Box */
+.inv-box {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #f0e6ff;
+  padding: 20px;
+  margin-bottom: 18px;
+}
+.inv-title {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #3b0082;
+  margin-bottom: 14px;
+}
+.inv-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #faf6ff;
+}
+.inv-row:last-child { border-bottom: none; }
+.inv-name { font-weight: 600; color: #1e0a3a; font-size: 0.88rem; }
+.inv-date { font-size: 0.75rem; color: #b0a0c8; margin-left: 8px; }
+
+.members-list { display: flex; flex-direction: column; gap: 10px; }
+
+.member-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 15px 18px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border: 1px solid #f0e6ff;
+  flex-wrap: wrap;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.member-card:hover { box-shadow: 0 4px 20px rgba(124,34,212,0.09); border-color: #dcc9f8; }
+
+.member-avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e9d8ff, #d4b8ff);
+  border: 2px solid #dcc9f8;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.82rem; font-weight: 800; color: #6819b8;
+  flex-shrink: 0; letter-spacing: 0.5px;
+  overflow: hidden;
+}
+
+.member-info { flex: 1; min-width: 140px; }
+.member-name { font-size: 0.91rem; font-weight: 700; color: #1e0a3a; }
+.member-meta { font-size: 0.75rem; color: #b0a0c8; margin-top: 3px; display: flex; align-items: center; gap: 5px; }
+.dot { font-size: 0.6rem; }
+
+.member-stats { display: flex; gap: 22px; flex-wrap: wrap; margin-right: 6px; }
+.mstat { text-align: center; }
+.mstat-lbl { font-size: 0.67rem; color: #c4b8d8; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; margin-bottom: 4px; }
+.mstat-val { font-size: 0.88rem; font-weight: 700; }
+.mstat-val.red   { color: #dc2626; }
+.mstat-val.green { color: #16a34a; }
+
+.member-actions { display: flex; gap: 8px; align-items: center; }
+
+.badge { display: inline-block; font-size: 0.71rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+.badge-green { background: #dcfce7; color: #15803d; }
+.badge-amber { background: #fef9c3; color: #a16207; }
+
+.empty-state {
+  text-align: center;
+  padding: 70px 20px;
+  background: #fff;
+  border-radius: 14px;
+  border: 1.5px dashed #e8d5ff;
+}
+.empty-icon { margin-bottom: 14px; }
+.empty-title { font-size: 0.95rem; font-weight: 700; color: #c4b0e8; margin-bottom: 5px; }
+.empty-sub { font-size: 0.8rem; color: #d4c8ea; }
+
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 0, 60, 0.38);
+  z-index: 400;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(3px);
+  padding: 20px;
+}
+.overlay.open { display: flex; }
+
+.modal {
+  background: #fff;
+  border-radius: 18px;
+  padding: 28px 26px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 60px rgba(80,10,160,0.18);
+  animation: slideUp 0.22s cubic-bezier(.32,.72,0,1);
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(14px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-header {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.modal-header h3 { font-size: 1rem; font-weight: 800; color: #3b0082; }
+.modal-close {
+  background: #f5eeff; border: none;
+  width: 28px; height: 28px;
+  border-radius: 50%; font-size: 1.1rem;
+  color: #9060c8; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.modal-close:hover { background: #ecdeff; }
+
+.fg { margin-bottom: 15px; }
+.fg label { display: block; font-size: 0.77rem; color: #9060c8; font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
+.fg input {
+  width: 100%;
+  border: 1.5px solid #ede6f8;
+  border-radius: 9px;
+  padding: 10px 13px;
+  font-size: 0.85rem;
+  outline: none;
+  background: #faf8ff;
+  color: #1e0a3a;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+.fg input:focus { border-color: #a855f7; }
+
+.input-wrap { position: relative; }
+.input-icon {
+  position: absolute; left: 12px; top: 50%;
+  transform: translateY(-50%);
+  color: #c0aee0; pointer-events: none; display: flex;
+}
+.input-wrap input { padding-left: 36px; }
+
+.modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+.modal-actions .btn-p { flex: 1; justify-content: center; }
+.modal-actions .btn-ghost { flex: 1; }
+
+@media (max-width: 580px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .member-card { gap: 12px; }
+  .member-stats { gap: 14px; }
+}
+</style>
+
+<script>
+function openModal() {
+  document.getElementById('addModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  document.getElementById('addModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('addModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+});
+</script>
+
+{% endblock %}
