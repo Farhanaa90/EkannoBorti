@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block title %}Create Mess{% endblock %}
+{% block content %}
+
+<style>
+  .create-mess-bg {
+    background: #f5f0ff;
+    min-height: calc(100vh - 120px);
+    padding: 48px 24px 40px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .create-mess-wrap {
+    width: 100%;
+    max-width: 480px;
+  }
+
+  .page-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #6d28d9;
+    margin-bottom: 5px;
+  }
+
+  .page-sub {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 22px;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 28px;
+    border: 1px solid #ede7f6;
+  }
+
+  .fg {
+    margin-bottom: 18px;
+  }
+
+  .fg label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 6px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+
+  .fg input[type="text"],
+  .fg textarea {
+    width: 100%;
+    padding: 10px 13px;
+    border: 1.5px solid #d1c4e9;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+    background: #faf8ff;
+    outline: none;
+    font-family: inherit;
+    box-sizing: border-box;
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  .fg input[type="text"]:focus,
+  .fg textarea:focus {
+    border-color: #7c3aed;
+    background: #fff;
+  }
+
+  .fg textarea {
+    resize: vertical;
+    min-height: 88px;
+  }
+
+  .btn-p {
+    background: #7c3aed;
+    color: #fff;
+    border: none;
+    padding: 11px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+  }
+
+  .btn-p:hover {
+    background: #6d28d9;
+  }
+
+  .btn-full {
+    width: 100%;
+    display: block;
+    margin-top: 4px;
+  }
+</style>
+
+<div class="create-mess-bg">
+  <div class="create-mess-wrap">
+    <p class="page-title">Create your mess</p>
+    <p class="page-sub">Fill in the details to set up your mess.</p>
+
+    <div class="card">
+      <form method="POST">
+        {% csrf_token %}
+        <div class="fg">
+          <label>Mess Name</label>
+          <input type="text" name="mess_name" placeholder="e.g. Dhaka Mess" required>
+        </div>
+        <div class="fg">
+          <label>Address</label>
+          <textarea name="address" placeholder="Full address of the mess" required></textarea>
+        </div>
+        <button type="submit" class="btn-p btn-full">Create Mess</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
